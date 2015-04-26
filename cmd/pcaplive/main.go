@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	MaxSnapLen = 65536
+	maxSnapLen   = 65536
 )
 
 var verbose = flag.Bool("v", false, "verbose")
@@ -55,7 +55,7 @@ func main() {
 	}()
 
 	hdr := &pcap.Header{
-		SnapLen:  MaxSnapLen,
+		SnapLen:  maxSnapLen,
 		LinkType: pcap.LINKTYPE_ETHERNET,
 	}
 	if err := pw.WriteHeader(hdr); err != nil {
@@ -67,7 +67,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var buf [MaxSnapLen]byte
+	var buf [maxSnapLen]byte
 	for {
 		n, _, err := syscall.Recvfrom(fd, buf[:], 0)
 		if err != nil {
