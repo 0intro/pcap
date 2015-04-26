@@ -10,12 +10,16 @@ import (
 	"log"
 	"os"
 	"syscall"
+	"time"
 
 	"github.com/0intro/pcap"
 )
 
 const (
 	maxSnapLen   = 65536
+	microPerSec  = int64(time.Second / time.Microsecond)
+	nanoPerSec   = int64(time.Second / time.Nanosecond)
+	nanoPerMicro = int64(time.Microsecond / time.Nanosecond)
 )
 
 var verbose = flag.Bool("v", false, "verbose")
@@ -27,6 +31,13 @@ func usage() {
 
 func htons(n int) int {
 	return int(uint16(byte(n))<<8 | uint16(byte(n>>8)))
+}
+
+func currTime() (int64, int64) {
+	t := time.Now()
+	sec := t.UnixNano() / nanoPerSec
+	usec := (t.UnixNano() / nanoPerMicro) % microPerSec
+	return sec, usec
 }
 
 func main() {
@@ -73,7 +84,8 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		record := &pcap.RecordHeader{TsSec: 0, TsUsec: 0, CapLen: uint32(n), Len: uint32(n)}
+		sec, usec := currTime()
+		record := &pcap.RecordHeader{TsSec: uint32(sec), TsUsec: uint32(usec), CapLen: uint32(n), Len: uint32(n)}
 		if err := pw.WriteRecordHeader(record); err != nil {
 			log.Fatal(err)
 		}
